@@ -125,7 +125,7 @@ public:
 	 *
 	 * @return The number of landmark mappings.
 	 */
-	auto size() const
+	size_t size() const
 	{
 		return landmark_mappings.size();
 	};
