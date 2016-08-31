@@ -52,8 +52,8 @@ endif()
 
 # All the options for building the library. Can be changed on the command-line or in initial_cache.cmake.
 message(STATUS "Options:")
-option(BUILD_EXAMPLES "Build the example applications." ON)
-message(STATUS "BUILD_EXAMPLES: ${BUILD_EXAMPLES}")
+option(EOS_BUILD_EXAMPLES "Build the example applications." ON)
+message(STATUS "EOS_BUILD_EXAMPLES: ${EOS_BUILD_EXAMPLES}")
 option(BUILD_DOCUMENTATION "Build the library documentation." OFF)
 message(STATUS "BUILD_DOCUMENTATION: ${BUILD_DOCUMENTATION}")
 
@@ -143,7 +143,7 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/share/ DESTINATION share) # the model and 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/cereal-1.1.1/ DESTINATION 3rdparty/cereal-1.1.1) # cereal headers
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/glm-0.9.7.0/ DESTINATION 3rdparty/glm-0.9.7.0) # glm headers
 
-if(BUILD_EXAMPLES)
+if(EOS_BUILD_EXAMPLES)
 	add_subdirectory(examples)
 endif()
 

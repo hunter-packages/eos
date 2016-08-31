@@ -18,5 +18,5 @@
 
 # Configuration options
 # ==============================
-set(BUILD_EXAMPLES ON CACHE BOOL "Build the example applications." FORCE)
+set(EOS_BUILD_EXAMPLES ON CACHE BOOL "Build the example applications." FORCE)
 set(BUILD_DOCUMENTATION OFF CACHE BOOL "Build the library documentation." FORCE)
