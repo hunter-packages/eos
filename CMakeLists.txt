@@ -140,7 +140,7 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/cereal-1.1.1/ DESTINATION 3rdpart
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/glm-0.9.7.0/ DESTINATION 3rdparty/glm-0.9.7.0) # glm headers
 
 if(EOS_BUILD_EXAMPLES)
-	add_subdirectory(examples)
+  add_subdirectory(examples)
 endif()
 
 if(BUILD_DOCUMENTATION)
