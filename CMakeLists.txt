@@ -50,8 +50,8 @@ endif()
 message(STATUS "Options:")
 option(EOS_BUILD_EXAMPLES "Build the example applications." ON)
 message(STATUS "EOS_BUILD_EXAMPLES: ${EOS_BUILD_EXAMPLES}")
-option(BUILD_DOCUMENTATION "Build the library documentation." OFF)
-message(STATUS "BUILD_DOCUMENTATION: ${BUILD_DOCUMENTATION}")
+option(EOS_BUILD_DOCUMENTATION "Build the library documentation." OFF)
+message(STATUS "EOS_BUILD_DOCUMENTATION: ${EOS_BUILD_DOCUMENTATION}")
 
 # Build a CPack driven installer package:
 include(InstallRequiredSystemLibraries) # This module will include any runtime libraries that are needed by the project for the current platform
@@ -143,6 +143,6 @@ if(EOS_BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
-if(BUILD_DOCUMENTATION)
+if(EOS_BUILD_DOCUMENTATION)
   add_subdirectory(doc)
 endif()
