@@ -22,7 +22,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
   endif()
   # Note: gcc is fine without -pthreads.
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC") # the quotes are needed here, maybe because "MSVC" seems to be a keyword
+elseif(MSVC) # the quotes are needed here, maybe because "MSVC" seems to be a keyword
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
     message(FATAL_ERROR "Visual Studio 2015 or newer is required.")
   endif()
