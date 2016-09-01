@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(eos)
-set(eos_VERSION_MAJOR 0)
-set(eos_VERSION_MINOR 6)
-set(eos_VERSION_PATCH 1)
-set(eos_VERSION ${eos_VERSION_MAJOR}.${eos_VERSION_MINOR}.${eos_VERSION_PATCH})
+project(eos VERSION 0.6.1)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
