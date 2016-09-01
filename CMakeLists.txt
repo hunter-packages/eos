@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.10)
+cmake_minimum_required(VERSION 3.0)
 project(eos)
 set(eos_VERSION_MAJOR 0)
 set(eos_VERSION_MINOR 6)
