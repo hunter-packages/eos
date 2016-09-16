@@ -74,7 +74,7 @@ endif()
 find_package(Boost 1.50.0 COMPONENTS system REQUIRED)
 message(STATUS "Boost found at ${Boost_INCLUDE_DIRS}")
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 find_package(Eigen3 REQUIRED)
 message(STATUS "Eigen3 found: ${EIGEN3_FOUND}")
 message(STATUS "Eigen3 include dir found at ${EIGEN3_INCLUDE_DIR}")
