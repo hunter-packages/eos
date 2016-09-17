@@ -17,12 +17,8 @@ message(STATUS "OpenCV lib dir found at ${OpenCV_LIB_DIR}")
 # This allows us to compile in RelWithDebInfo. It'll use the Release-version of OpenCV:
 set_target_properties(${OpenCV_LIBS} PROPERTIES MAP_IMPORTED_CONFIG_RELWITHDEBINFO RELEASE)
 
-if(MSVC)
-	# The standard find_package for boost on Win finds the dynamic libs, so for dynamic linking to boost we need to #define:
-	add_definitions(-DBOOST_ALL_NO_LIB) # Don't use the automatic library linking by boost with VS (#pragma ...). Instead, we specify everything here in cmake.
-	add_definitions(-DBOOST_ALL_DYN_LINK) # Link against the dynamic boost lib - needs to match with the version that find_package finds.
-endif()
-find_package(Boost 1.50.0 COMPONENTS system filesystem program_options REQUIRED)
+hunter_add_package(Boost COMPONENTS system filesystem program_options)
+find_package(Boost CONFIG REQUIRED system filesystem program_options)
 message(STATUS "Boost found at ${Boost_INCLUDE_DIRS}")
 
 if(MSVC)
@@ -31,11 +27,11 @@ endif()
 
 # Model fitting (affine cam & shape to landmarks) example:
 add_executable(fit-model fit-model.cpp)
-target_link_libraries(fit-model ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(fit-model ${OpenCV_LIBS} Boost::system Boost::filesystem Boost::program_options)
 
 # Converts a CVSSP .scm Morphable Model to a cereal binary file:
 add_executable(scm-to-cereal scm-to-cereal.cpp)
-target_link_libraries(scm-to-cereal ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(scm-to-cereal ${OpenCV_LIBS} Boost::system Boost::filesystem Boost::program_options)
 
 # install target:
 install(TARGETS fit-model DESTINATION bin)
