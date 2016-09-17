@@ -30,8 +30,8 @@
 #include "cereal/cereal.hpp"
 #include "cereal/archives/json.hpp"
 
-#include "Eigen/Geometry"
-#include "unsupported/Eigen/NonLinearOptimization"
+#include "eigen3/Eigen/Geometry"
+#include "eigen3/unsupported/Eigen/NonLinearOptimization"
 
 #include "opencv2/core/core.hpp"
 

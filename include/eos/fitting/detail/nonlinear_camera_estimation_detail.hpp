@@ -24,7 +24,7 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
-#include "Eigen/Geometry"
+#include "eigen3/Eigen/Geometry"
 
 #include "opencv2/core/core.hpp"
 
