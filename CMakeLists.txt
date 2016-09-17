@@ -116,10 +116,10 @@ set(HEADERS
 
 # Add header includes:
 include_directories("include")
-include_directories(${OpenCV_INCLUDE_DIRS})
+
+add_library(eos INTERFACE)
 
 # Custom target for the library, to make the headers show up in IDEs:
-add_custom_target(eos SOURCES ${HEADERS})
 source_group(core include/eos/core/*)
 source_group(morphablemodel include/eos/morphablemodel/*)
 source_group(morphablemodel\\io include/eos/morphablemodel/io/*)
