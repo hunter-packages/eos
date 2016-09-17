@@ -70,7 +70,7 @@ include(CPack)
 
 # Find dependencies:
 hunter_add_package(OpenCV)
-find_package(OpenCV 2.4.3 REQUIRED core)
+find_package(OpenCV REQUIRED core)
 message(STATUS "OpenCV include dir found at ${OpenCV_INCLUDE_DIRS}")
 message(STATUS "OpenCV lib dir found at ${OpenCV_LIB_DIR}")
 
@@ -118,6 +118,7 @@ set(HEADERS
 include_directories("include")
 
 add_library(eos INTERFACE)
+target_link_libraries(eos INTERFACE Eigen::eigen)
 
 # Custom target for the library, to make the headers show up in IDEs:
 source_group(core include/eos/core/*)
