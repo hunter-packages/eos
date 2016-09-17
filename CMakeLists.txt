@@ -55,7 +55,7 @@ message(STATUS "EOS_BUILD_DOCUMENTATION: ${EOS_BUILD_DOCUMENTATION}")
 
 # Build a CPack driven installer package:
 include(InstallRequiredSystemLibraries) # This module will include any runtime libraries that are needed by the project for the current platform
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_LIST_DIR}/LICENSE")
 set(CPACK_PACKAGE_VERSION_MAJOR "${eos_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${eos_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${eos_VERSION_PATCH}")
