@@ -80,8 +80,8 @@ find_package(Boost CONFIG REQUIRED system)
 hunter_add_package(Eigen)
 find_package(Eigen REQUIRED) # Eigen::eigen
 
-set(CEREAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/cereal-1.1.1/include")
-set(glm_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/glm-0.9.7.0")
+set(CEREAL_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/3rdparty/cereal-1.1.1/include")
+set(glm_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/3rdparty/glm-0.9.7.0")
 
 # Header files:
 set(HEADERS
@@ -128,10 +128,10 @@ source_group(render include/eos/render/*)
 source_group(render\\detail include/eos/render/detail/*)
 
 # The install target:
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include) # our library headers
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/share/ DESTINATION share) # the model and metadata
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/cereal-1.1.1/ DESTINATION 3rdparty/cereal-1.1.1) # cereal headers
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/glm-0.9.7.0/ DESTINATION 3rdparty/glm-0.9.7.0) # glm headers
+install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/ DESTINATION include) # our library headers
+install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/share/ DESTINATION share) # the model and metadata
+install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/3rdparty/cereal-1.1.1/ DESTINATION 3rdparty/cereal-1.1.1) # cereal headers
+install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/3rdparty/glm-0.9.7.0/ DESTINATION 3rdparty/glm-0.9.7.0) # glm headers
 
 if(EOS_BUILD_EXAMPLES)
   add_subdirectory(examples)

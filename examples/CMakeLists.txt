@@ -35,4 +35,4 @@ target_link_libraries(scm-to-cereal ${OpenCV_LIBS} Boost::system Boost::filesyst
 # install target:
 install(TARGETS fit-model DESTINATION bin)
 install(TARGETS scm-to-cereal DESTINATION bin)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/examples/data DESTINATION bin)
+install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/data DESTINATION bin)
