@@ -69,6 +69,7 @@ set(CPACK_PACKAGE_VERSION_PATCH "${eos_VERSION_PATCH}")
 include(CPack)
 
 # Find dependencies:
+hunter_add_package(OpenCV)
 find_package(OpenCV 2.4.3 REQUIRED core)
 message(STATUS "OpenCV include dir found at ${OpenCV_INCLUDE_DIRS}")
 message(STATUS "OpenCV lib dir found at ${OpenCV_LIB_DIR}")
