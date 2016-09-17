@@ -83,7 +83,8 @@ find_package(Eigen REQUIRED) # Eigen::eigen
 hunter_add_package(cereal)
 find_package(cereal CONFIG REQUIRED) # cereal::cereal
 
-set(glm_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/3rdparty/glm-0.9.7.0")
+hunter_add_package(glm)
+find_package(glm REQUIRED) # glm
 
 # Header files:
 set(HEADERS
@@ -116,7 +117,6 @@ set(HEADERS
 # Add header includes:
 include_directories("include")
 include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories(${glm_INCLUDE_DIR})
 
 # Custom target for the library, to make the headers show up in IDEs:
 add_custom_target(eos SOURCES ${HEADERS})
@@ -131,8 +131,6 @@ source_group(render\\detail include/eos/render/detail/*)
 # The install target:
 install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/ DESTINATION include) # our library headers
 install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/share/ DESTINATION share) # the model and metadata
-install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/3rdparty/cereal-1.1.1/ DESTINATION 3rdparty/cereal-1.1.1) # cereal headers
-install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/3rdparty/glm-0.9.7.0/ DESTINATION 3rdparty/glm-0.9.7.0) # glm headers
 
 if(EOS_BUILD_EXAMPLES)
   add_subdirectory(examples)
