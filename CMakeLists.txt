@@ -77,11 +77,8 @@ message(STATUS "OpenCV lib dir found at ${OpenCV_LIB_DIR}")
 hunter_add_package(Boost COMPONENTS system)
 find_package(Boost CONFIG REQUIRED system)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
-find_package(Eigen3 REQUIRED)
-message(STATUS "Eigen3 found: ${EIGEN3_FOUND}")
-message(STATUS "Eigen3 include dir found at ${EIGEN3_INCLUDE_DIR}")
-message(STATUS "Eigen3 version: ${EIGEN3_VERSION}")
+hunter_add_package(Eigen)
+find_package(Eigen REQUIRED) # Eigen::eigen
 
 set(CEREAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/cereal-1.1.1/include")
 set(glm_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/glm-0.9.7.0")
@@ -117,9 +114,7 @@ set(HEADERS
 # Add header includes:
 include_directories("include")
 include_directories(${CEREAL_INCLUDE_DIR})
-include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${glm_INCLUDE_DIR})
 
 # Custom target for the library, to make the headers show up in IDEs:

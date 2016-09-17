@@ -19,7 +19,6 @@ set_target_properties(${OpenCV_LIBS} PROPERTIES MAP_IMPORTED_CONFIG_RELWITHDEBIN
 
 hunter_add_package(Boost COMPONENTS system filesystem program_options)
 find_package(Boost CONFIG REQUIRED system filesystem program_options)
-message(STATUS "Boost found at ${Boost_INCLUDE_DIRS}")
 
 if(MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
