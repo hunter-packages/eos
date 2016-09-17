@@ -80,7 +80,9 @@ find_package(Boost CONFIG REQUIRED system)
 hunter_add_package(Eigen)
 find_package(Eigen REQUIRED) # Eigen::eigen
 
-set(CEREAL_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/3rdparty/cereal-1.1.1/include")
+hunter_add_package(cereal)
+find_package(cereal CONFIG REQUIRED) # cereal::cereal
+
 set(glm_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/3rdparty/glm-0.9.7.0")
 
 # Header files:
@@ -113,7 +115,6 @@ set(HEADERS
 
 # Add header includes:
 include_directories("include")
-include_directories(${CEREAL_INCLUDE_DIR})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${glm_INCLUDE_DIR})
 
