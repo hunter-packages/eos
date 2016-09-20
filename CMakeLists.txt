@@ -118,7 +118,15 @@ set(HEADERS
 include_directories("include")
 
 add_library(eos INTERFACE)
-target_link_libraries(eos INTERFACE Eigen::eigen)
+target_link_libraries(
+    eos
+    INTERFACE
+    ${OpenCV_LIBS}
+    Boost::system
+    Eigen::eigen
+    cereal::cereal
+    glm
+)
 
 # Custom target for the library, to make the headers show up in IDEs:
 source_group(core include/eos/core/*)
