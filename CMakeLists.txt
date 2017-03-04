@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.15.26.tar.gz"
-    SHA1 "7e292fcda36d4cf1214bd4bd8d2360d66fa44395"
+    URL "https://github.com/ruslo/hunter/archive/v0.18.9.tar.gz"
+    SHA1 "90bf10e2895531145332a8963725a351d7345c58"
 )
 
 project(eos VERSION 0.6.1)
@@ -78,7 +78,7 @@ hunter_add_package(Boost COMPONENTS system)
 find_package(Boost CONFIG REQUIRED system)
 
 hunter_add_package(Eigen)
-find_package(Eigen REQUIRED) # Eigen::eigen
+find_package(Eigen3 REQUIRED) # Eigen3::Eigen
 
 hunter_add_package(cereal)
 find_package(cereal CONFIG REQUIRED) # cereal::cereal
@@ -123,7 +123,7 @@ target_link_libraries(
     INTERFACE
     ${OpenCV_LIBS}
     Boost::system
-    Eigen::eigen
+    Eigen3::Eigen
     cereal::cereal
     glm
 )
