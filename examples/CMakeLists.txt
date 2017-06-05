@@ -7,16 +7,21 @@ message(STATUS "Boost found at ${Boost_INCLUDE_DIRS}")
 
 set(boost_libs Boost::system Boost::filesystem Boost::program_options)
 
+# https://stackoverflow.com/a/39547577
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
+
 # Simple model fitting (orthographic camera & shape to landmarks) example:
 add_executable(fit-model-simple fit-model-simple.cpp)
 target_link_libraries(fit-model-simple eos ${OpenCV_LIBS} ${boost_libs})
-target_link_libraries(fit-model-simple "$<$<CXX_COMPILER_ID:GNU>:-pthread>$<$<CXX_COMPILER_ID:Clang>:-pthreads>")
+target_link_libraries(fit-model-simple Threads::Threads)
 install(TARGETS fit-model-simple DESTINATION bin)
 
 # Model fitting example that fits orthographic camera, shape, blendshapes, and contours:
 add_executable(fit-model fit-model.cpp)
 target_link_libraries(fit-model eos ${OpenCV_LIBS} ${boost_libs})
-target_link_libraries(fit-model "$<$<CXX_COMPILER_ID:GNU>:-pthread>$<$<CXX_COMPILER_ID:Clang>:-pthreads>")
+target_link_libraries(fit-model Threads::Threads)
 install(TARGETS fit-model DESTINATION bin)
 
 # Generate random samples from the model:
