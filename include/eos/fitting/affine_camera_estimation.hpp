@@ -1,5 +1,5 @@
 /*
- * Eos - A 3D Morphable Model fitting library written in modern C++11/14.
+ * eos - A 3D Morphable Model fitting library written in modern C++11/14.
  *
  * File: include/eos/fitting/affine_camera_estimation.hpp
  *
@@ -50,7 +50,7 @@ namespace eos {
  * @param[in] model_points Corresponding points of a 3D model.
  * @return A 3x4 affine camera matrix (the third row is [0, 0, 0, 1]).
  */
-cv::Mat estimate_affine_camera(std::vector<cv::Vec2f> image_points, std::vector<cv::Vec4f> model_points)
+inline cv::Mat estimate_affine_camera(std::vector<cv::Vec2f> image_points, std::vector<cv::Vec4f> model_points)
 {
 	using cv::Mat;
 	assert(image_points.size() == model_points.size());
@@ -165,7 +165,7 @@ cv::Mat estimate_affine_camera(std::vector<cv::Vec2f> image_points, std::vector<
  *
  * Note: Assumes the affine camera matrix only projects from world
  * to clip space, because a subsequent window transform is applied.
- * #Todo: This is outdated, now that we estimate the matrix from world
+ * Todo: This is outdated, now that we estimate the matrix from world
  * to screen space directly.
  *
  * @param[in] vertex A vertex in 3D space. vertex[3] = 1.0f.

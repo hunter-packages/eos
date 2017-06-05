@@ -1,38 +1,37 @@
-project(examples)
-cmake_minimum_required(VERSION 2.8.10)
-
 # The examples need a few additional dependencies (e.g. boost filesystem and OpenCV highgui):
-
-#check installed version in order to include the correct OpenCV libraries
-#version variable is defined from project root's CMakeLists
-if("${OpenCV_VERSION_MAJOR}$" EQUAL 2)
-  message(STATUS "OpenCV 2.x detected")
-  find_package(OpenCV 2.4.3 REQUIRED core imgproc highgui)
-elseif("${OpenCV_VERSION_MAJOR}$" EQUAL 3)
-  message(STATUS "OpenCV 3.x detected - including imgcodecs for compatibility")
-  find_package(OpenCV 3.0.0 REQUIRED core imgproc imgcodecs)
-endif()
-message(STATUS "OpenCV include dir found at ${OpenCV_INCLUDE_DIRS}")
-message(STATUS "OpenCV lib dir found at ${OpenCV_LIB_DIR}")
-# This allows us to compile in RelWithDebInfo. It'll use the Release-version of OpenCV:
-set_target_properties(${OpenCV_LIBS} PROPERTIES MAP_IMPORTED_CONFIG_RELWITHDEBINFO RELEASE)
+find_package(OpenCV REQUIRED core highgui)
 
 hunter_add_package(Boost COMPONENTS system filesystem program_options)
-find_package(Boost CONFIG REQUIRED system filesystem program_options)
+find_package(Boost 1.50.0 COMPONENTS system filesystem program_options REQUIRED)
+message(STATUS "Boost found at ${Boost_INCLUDE_DIRS}")
 
-if(MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-endif()
+# Simple model fitting (orthographic camera & shape to landmarks) example:
+add_executable(fit-model-simple fit-model-simple.cpp)
+target_link_libraries(fit-model-simple eos ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(fit-model-simple "$<$<CXX_COMPILER_ID:GNU>:-pthread>$<$<CXX_COMPILER_ID:Clang>:-pthreads>")
+install(TARGETS fit-model-simple DESTINATION bin)
 
-# Model fitting (affine cam & shape to landmarks) example:
+# Model fitting example that fits orthographic camera, shape, blendshapes, and contours:
 add_executable(fit-model fit-model.cpp)
-target_link_libraries(fit-model ${OpenCV_LIBS} Boost::system Boost::filesystem Boost::program_options)
-
-# Converts a CVSSP .scm Morphable Model to a cereal binary file:
-add_executable(scm-to-cereal scm-to-cereal.cpp)
-target_link_libraries(scm-to-cereal ${OpenCV_LIBS} Boost::system Boost::filesystem Boost::program_options)
-
-# install target:
+target_link_libraries(fit-model eos ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(fit-model "$<$<CXX_COMPILER_ID:GNU>:-pthread>$<$<CXX_COMPILER_ID:Clang>:-pthreads>")
 install(TARGETS fit-model DESTINATION bin)
-install(TARGETS scm-to-cereal DESTINATION bin)
-install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/data DESTINATION bin)
+
+# Generate random samples from the model:
+add_executable(generate-obj generate-obj.cpp)
+target_link_libraries(generate-obj eos ${OpenCV_LIBS} ${Boost_LIBRARIES} Eigen3::Eigen)
+install(TARGETS generate-obj DESTINATION bin)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION bin)
+
+if(EOS_BUILD_CERES_EXAMPLE)
+  # Find Ceres, for the fit-model-ceres app:
+  hunter_add_package(ceres-solver)
+  find_package(Ceres CONFIG REQUIRED)
+  message(STATUS "Ceres locations: Headers: ${CERES_INCLUDE_DIRS} Library: ${CERES_LIBRARIES}")
+
+  # Single and multi-image non-linear model fitting with Ceres example:
+  add_executable(fit-model-ceres fit-model-ceres.cpp)
+  target_link_libraries(fit-model-ceres eos ${CERES_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES})
+  install(TARGETS fit-model-ceres DESTINATION bin)
+endif()

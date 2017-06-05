@@ -1,5 +1,5 @@
 /*
- * Eos - A 3D Morphable Model fitting library written in modern C++11/14.
+ * eos - A 3D Morphable Model fitting library written in modern C++11/14.
  *
  * File: include/eos/render/render_affine.hpp
  *
@@ -22,9 +22,13 @@
 #ifndef RENDER_AFFINE_HPP_
 #define RENDER_AFFINE_HPP_
 
+#include "eos/core/Mesh.hpp"
 #include "eos/render/detail/render_detail.hpp"
 #include "eos/render/detail/render_affine_detail.hpp"
-#include "eos/render/Mesh.hpp"
+
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
 
 #include "opencv2/core/core.hpp"
 
@@ -49,7 +53,7 @@ namespace eos {
  * @param[in] do_backface_culling Whether the renderer should perform backface culling.
  * @return A pair with the colourbuffer as its first element and the depthbuffer as the second element.
  */
-std::pair<cv::Mat, cv::Mat> render_affine(Mesh mesh, cv::Mat affine_camera_matrix, int viewport_width, int viewport_height, bool do_backface_culling = true)
+inline std::pair<cv::Mat, cv::Mat> render_affine(const core::Mesh& mesh, cv::Mat affine_camera_matrix, int viewport_width, int viewport_height, bool do_backface_culling = true)
 {
 	assert(mesh.vertices.size() == mesh.colors.size() || mesh.colors.empty()); // The number of vertices has to be equal for both shape and colour, or, alternatively, it has to be a shape-only model.
 	//assert(mesh.vertices.size() == mesh.texcoords.size() || mesh.texcoords.empty()); // same for the texcoords
@@ -62,31 +66,32 @@ std::pair<cv::Mat, cv::Mat> render_affine(Mesh mesh, cv::Mat affine_camera_matri
 
 	Mat affine_with_z = detail::calculate_affine_z_direction(affine_camera_matrix);
 
-	vector<detail::Vertex> projected_vertices;
+	vector<detail::Vertex<float>> projected_vertices;
 	projected_vertices.reserve(mesh.vertices.size());
 	for (int i = 0; i < mesh.vertices.size(); ++i) {
-		Mat vertex_screen_coords = affine_with_z * Mat(mesh.vertices[i]);
-		cv::Vec3f vertex_colour;
+		Mat vertex_screen_coords = affine_with_z * Mat(cv::Vec4f(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z, mesh.vertices[i].w));
+		glm::tvec4<float> vertex_screen_coords_glm(vertex_screen_coords.at<float>(0), vertex_screen_coords.at<float>(1), vertex_screen_coords.at<float>(2), vertex_screen_coords.at<float>(3));
+		glm::tvec3<float> vertex_colour;
 		if (mesh.colors.empty()) {
-			vertex_colour = cv::Vec3f(0.5f, 0.5f, 0.5f);
+			vertex_colour = glm::tvec3<float>(0.5f, 0.5f, 0.5f);
 		}
 		else {
 			vertex_colour = mesh.colors[i];
 		}
-		projected_vertices.push_back(detail::Vertex(vertex_screen_coords, vertex_colour, mesh.texcoords[i]));
+		projected_vertices.push_back(detail::Vertex<float>{vertex_screen_coords_glm, vertex_colour, mesh.texcoords[i]});
 	}
 
 	// All vertices are screen-coordinates now
 	vector<detail::TriangleToRasterize> triangles_to_raster;
 	for (const auto& tri_indices : mesh.tvi) {
 		if (do_backface_culling) {
-			if (!detail::are_vertices_ccw_in_screen_space(projected_vertices[tri_indices[0]].position, projected_vertices[tri_indices[1]].position, projected_vertices[tri_indices[2]].position))
+			if (!detail::are_vertices_ccw_in_screen_space(glm::tvec2<float>(projected_vertices[tri_indices[0]].position), glm::tvec2<float>(projected_vertices[tri_indices[1]].position), glm::tvec2<float>(projected_vertices[tri_indices[2]].position)))
 				continue; // don't render this triangle
 		}
 
 		// Get the bounding box of the triangle:
 		// take care: What do we do if all 3 vertices are not visible. Seems to work on a test case.
-		cv::Rect bounding_box = detail::calculate_clipped_bounding_box(projected_vertices[tri_indices[0]].position, projected_vertices[tri_indices[1]].position, projected_vertices[tri_indices[2]].position, viewport_width, viewport_height);
+		cv::Rect bounding_box = detail::calculate_clipped_bounding_box(glm::tvec2<float>(projected_vertices[tri_indices[0]].position), glm::tvec2<float>(projected_vertices[tri_indices[1]].position), glm::tvec2<float>(projected_vertices[tri_indices[2]].position), viewport_width, viewport_height);
 		auto min_x = bounding_box.x;
 		auto max_x = bounding_box.x + bounding_box.width;
 		auto min_y = bounding_box.y;

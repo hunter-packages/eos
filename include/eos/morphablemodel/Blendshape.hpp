@@ -1,5 +1,5 @@
 /*
- * Eos - A 3D Morphable Model fitting library written in modern C++11/14.
+ * eos - A 3D Morphable Model fitting library written in modern C++11/14.
  *
  * File: include/eos/morphablemodel/Blendshape.hpp
  *
@@ -22,13 +22,15 @@
 #ifndef BLENDSHAPE_HPP_
 #define BLENDSHAPE_HPP_
 
-#include "eos/morphablemodel/io/mat_cerealisation.hpp"
+#include "eos/morphablemodel/io/eigen_cerealisation.hpp"
 #include "cereal/types/string.hpp"
 #include "cereal/archives/binary.hpp"
 
-#include "opencv2/core/core.hpp"
+#include "Eigen/Core"
 
 #include <string>
+#include <vector>
+#include <cassert>
 #include <fstream>
 
 namespace eos {
@@ -44,20 +46,25 @@ namespace eos {
 struct Blendshape
 {
 	std::string name; ///< Name of the blendshape.
-	cv::Mat deformation; ///< A 3m x 1 col-vector (xyzxyz...)', where m is the number of model-vertices. Has the same format as PcaModel::mean.
+	Eigen::VectorXf deformation; ///< A 3m x 1 col-vector (xyzxyz...)', where m is the number of model-vertices. Has the same format as PcaModel::mean.
 
 	friend class cereal::access;
 	/**
 	 * Serialises this class using cereal.
 	 *
-	 * @param[in] ar The archive to serialise to (or to serialise from).
+	 * @param[in] archive The archive to serialise to (or to serialise from).
 	 */
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
-		archive(name, deformation);
+		archive(CEREAL_NVP(name), CEREAL_NVP(deformation));
 	};
 };
+
+/**
+ * Shorthand notation for an std::vector<Blendshape>.
+ */
+using Blendshapes = std::vector<Blendshape>;
 
 /**
  * Helper method to load a file with blendshapes from
@@ -67,7 +74,7 @@ struct Blendshape
  * @return The loaded blendshapes.
  * @throw std::runtime_error When the file given in \c filename fails to be opened (most likely because the file doesn't exist).
  */
-std::vector<Blendshape> load_blendshapes(std::string filename)
+inline std::vector<Blendshape> load_blendshapes(std::string filename)
 {
 	std::vector<Blendshape> blendshapes;
 
@@ -79,6 +86,39 @@ std::vector<Blendshape> load_blendshapes(std::string filename)
 	input_archive(blendshapes);
 
 	return blendshapes;
+};
+
+/**
+ * @brief Copies the blendshapes into a matrix, with each column being a blendshape.
+ *
+ * @param[in] blendshapes Vector of blendshapes.
+ * @return The resulting matrix.
+ */
+inline Eigen::MatrixXf to_matrix(const std::vector<Blendshape>& blendshapes)
+{
+	assert(blendshapes.size() > 0);
+	// Todo: Assert all blendshapes have to have the same number of rows, and one col
+
+	Eigen::MatrixXf blendshapes_as_basis(blendshapes[0].deformation.rows(), blendshapes.size());
+	for (int i = 0; i < blendshapes.size(); ++i)
+	{
+		blendshapes_as_basis.col(i) = blendshapes[i].deformation;
+	}
+	return blendshapes_as_basis;
+};
+
+/**
+ * @brief Maps an std::vector of coefficients with Eigen::Map, so it can be multiplied
+ * with a blendshapes matrix.
+ *
+ * Note that  the resulting Eigen::Map only lives as long as the data given lives and is in scope.
+ *
+ * @param[in] coefficients Vector of blendshape coefficients.
+ * @return An Eigen::Map pointing to the given coefficients data.
+ */
+inline Eigen::Map<const Eigen::VectorXf> to_vector(const std::vector<float>& coefficients)
+{
+	return Eigen::Map<const Eigen::VectorXf>(coefficients.data(), coefficients.size());
 };
 
 	} /* namespace morphablemodel */

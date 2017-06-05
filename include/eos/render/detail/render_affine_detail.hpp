@@ -1,5 +1,5 @@
 /*
- * Eos - A 3D Morphable Model fitting library written in modern C++11/14.
+ * eos - A 3D Morphable Model fitting library written in modern C++11/14.
  *
  * File: include/eos/render/detail/render_affine_detail.hpp
  *
@@ -24,6 +24,8 @@
 
 #include "eos/render/detail/render_detail.hpp"
 
+#include "glm/vec3.hpp"
+
 #include "opencv2/core/core.hpp"
 
 /**
@@ -46,7 +48,7 @@ namespace eos {
  * @param[in] affine_camera_matrix A 3x4 affine camera matrix.
  * @return The matrix with a third row inserted.
  */
-cv::Mat calculate_affine_z_direction(cv::Mat affine_camera_matrix)
+inline cv::Mat calculate_affine_z_direction(cv::Mat affine_camera_matrix)
 {
 	using cv::Mat;
 	// Take the cross product of row 0 with row 1 to get the direction perpendicular to the viewing plane (= the viewing direction).
@@ -91,7 +93,7 @@ cv::Mat calculate_affine_z_direction(cv::Mat affine_camera_matrix)
  * @param[in] colourbuffer The colour buffer to draw into.
  * @param[in] depthbuffer The depth buffer to draw into and use for the depth test.
  */
-void raster_triangle_affine(TriangleToRasterize triangle, cv::Mat colourbuffer, cv::Mat depthbuffer)
+inline void raster_triangle_affine(TriangleToRasterize triangle, cv::Mat colourbuffer, cv::Mat depthbuffer)
 {
 	for (int yi = triangle.min_y; yi <= triangle.max_y; ++yi)
 	{
@@ -121,7 +123,7 @@ void raster_triangle_affine(TriangleToRasterize triangle, cv::Mat colourbuffer, 
 				{
 					// attributes interpolation
 					// pixel_color is in RGB, v.color are RGB
-					cv::Vec3f pixel_color = alpha*triangle.v0.color + beta*triangle.v1.color + gamma*triangle.v2.color;
+					glm::tvec3<float> pixel_color = static_cast<float>(alpha)*triangle.v0.color + static_cast<float>(beta)*triangle.v1.color + static_cast<float>(gamma)*triangle.v2.color;
 
 					// clamp bytes to 255
 					const unsigned char red = static_cast<unsigned char>(255.0f * std::min(pixel_color[0], 1.0f)); // Todo: Proper casting (rounding?)
