@@ -1,5 +1,5 @@
 /*
- * Eos - A 3D Morphable Model fitting library written in modern C++11/14.
+ * eos - A 3D Morphable Model fitting library written in modern C++11/14.
  *
  * File: include/eos/render/utils.hpp
  *
@@ -22,7 +22,10 @@
 #ifndef RENDER_UTILS_HPP_
 #define RENDER_UTILS_HPP_
 
-#include "eos/render/Mesh.hpp"
+#include "eos/core/Mesh.hpp"
+
+#include "glm/vec3.hpp"
+#include "glm/geometric.hpp"
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -81,6 +84,14 @@ inline cv::Vec2f screen_to_clip_space(const cv::Vec2f& screen_coordinates, int s
 	return cv::Vec2f(x_cs, y_cs);
 };
 
+template<typename T, glm::precision P = glm::defaultp>
+glm::tvec2<T, P> clip_to_screen_space(const T clip_coord_x, const T clip_coord_y, int screen_width, int screen_height) {
+	// Todo: See/copy notes from utils.hpp/clip_to_screen_space.
+	const T x_ss = (clip_coord_x + T(1)) * (screen_width / 2.0);
+	const T y_ss = screen_height - (clip_coord_y + T(1)) * (screen_height / 2.0); // also flip y; Qt: Origin top-left. OpenGL: bottom-left.
+	return glm::tvec2<T, P>(x_ss, y_ss);
+};
+
 /**
  * Calculates the normal of a face (or triangle), i.e. the
  * per-face normal. Return normal will be normalised.
@@ -92,10 +103,28 @@ inline cv::Vec2f screen_to_clip_space(const cv::Vec2f& screen_coordinates, int s
  * @param[in] v2 Third vertex.
  * @return The unit-length normal of the given triangle.
  */
-cv::Vec3f calculate_face_normal(const cv::Vec3f& v0, const cv::Vec3f& v1, const cv::Vec3f& v2)
+inline cv::Vec3f calculate_face_normal(const cv::Vec3f& v0, const cv::Vec3f& v1, const cv::Vec3f& v2)
 {
 	cv::Vec3f n = (v1 - v0).cross(v2 - v0); // v0-to-v1 x v0-to-v2
 	n /= cv::norm(n);
+	return n;
+};
+
+/**
+ * Computes the normal of a face (or triangle), i.e. the
+ * per-face normal. Return normal will be normalised.
+ * Assumes the triangle is given in CCW order, i.e. vertices
+ * in counterclockwise order on the screen are front-facing.
+ *
+ * @param[in] v0 First vertex.
+ * @param[in] v1 Second vertex.
+ * @param[in] v2 Third vertex.
+ * @return The unit-length normal of the given triangle.
+ */
+inline glm::vec3 compute_face_normal(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2)
+{
+	glm::vec3 n = glm::cross(v1 - v0, v2 - v0); // v0-to-v1 x v0-to-v2
+	n = glm::normalize(n);
 	return n;
 };
 
@@ -108,7 +137,7 @@ cv::Vec3f calculate_face_normal(const cv::Vec3f& v0, const cv::Vec3f& v1, const 
  * @param[in] image An optional image to draw onto.
  * @return An image with the texture coordinate triangles drawn in it, 512x512 if no image is given.
  */
-cv::Mat draw_texcoords(Mesh mesh, cv::Mat image = cv::Mat())
+inline cv::Mat draw_texcoords(core::Mesh mesh, cv::Mat image = cv::Mat())
 {
 	using cv::Point2f;
 	using cv::Scalar;
@@ -126,7 +155,7 @@ cv::Mat draw_texcoords(Mesh mesh, cv::Mat image = cv::Mat())
 };
 
 // TODO: Should go to detail:: namespace, or texturing/utils or whatever.
-unsigned int get_max_possible_mipmaps_num(unsigned int width, unsigned int height)
+inline unsigned int get_max_possible_mipmaps_num(unsigned int width, unsigned int height)
 {
 	unsigned int mipmapsNum = 1;
 	unsigned int size = std::max(width, height);
@@ -147,11 +176,15 @@ inline bool is_power_of_two(int x)
 	return !(x & (x - 1));
 };
 
+/**
+ * @brief Represents a texture for rendering.
+ * 
+ * Represents a texture and mipmap levels for use in the renderer.
+ * Todo: This whole class needs a major overhaul and documentation.
+ */
 class Texture
 {
 public:
-	// Todo: This whole class needs a major overhaul and documentation.
-
 	std::vector<cv::Mat> mipmaps;	// make Texture a friend class of renderer, then move this to private?
 	unsigned char widthLog, heightLog; // log2 of width and height of the base mip-level
 
@@ -161,7 +194,8 @@ public:
 };
 
 // throws: ocv exc,  runtime_ex
-Texture create_mipmapped_texture(cv::Mat image, unsigned int mipmapsNum = 0) {
+inline Texture create_mipmapped_texture(cv::Mat image, unsigned int mipmapsNum = 0)
+{
 	assert(image.type() == CV_8UC3 || image.type() == CV_8UC4);
 
 	Texture texture;

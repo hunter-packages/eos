@@ -1,9 +1,9 @@
 /*
- * Eos - A 3D Morphable Model fitting library written in modern C++11/14.
+ * eos - A 3D Morphable Model fitting library written in modern C++11/14.
  *
  * File: include/eos/render/detail/render_detail.hpp
  *
- * Copyright 2014, 2015 Patrik Huber
+ * Copyright 2014-2017 Patrik Huber
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,11 @@
 #ifndef RENDER_DETAIL_HPP_
 #define RENDER_DETAIL_HPP_
 
+#include "eos/render/utils.hpp"
+#include "eos/render/detail/Vertex.hpp"
+
+#include "glm/glm.hpp" // tvec2, glm::precision, tvec3, tvec4, normalize, dot, cross
+
 #include "opencv2/core/core.hpp"
 
 #include "boost/optional.hpp"
@@ -33,23 +38,6 @@
 namespace eos {
 	namespace render {
 		namespace detail {
-
-/**
- * Just a representation for a vertex during rendering.
- *
- * Might consider getting rid of it.
- * Used in render_affine and render.
- */
-class Vertex
-{
-public:
-	Vertex() {};
-	Vertex(const cv::Vec4f& position, const cv::Vec3f& color, const cv::Vec2f& texcoords) : position(position), color(color), texcoords(texcoords) {};
-
-	cv::Vec4f position;
-	cv::Vec3f color; ///< in RGB order
-	cv::Vec2f texcoords;
-};
 
 class plane
 {
@@ -93,6 +81,20 @@ public:
 		d = -(point1.dot(normal));
 	}
 
+	template<typename T, glm::precision P = glm::defaultp>
+	plane(const glm::tvec3<T, P>& point1, const glm::tvec3<T, P>& point2, const glm::tvec3<T, P>& point3)
+	{
+		glm::tvec3<T, P> v1 = point2 - point1;
+		glm::tvec3<T, P> v2 = point3 - point1;
+		glm::tvec3<T, P> normal = glm::cross(v1, v2);
+		normal = glm::normalize(normal);
+
+		a = normal[0];
+		b = normal[1];
+		c = normal[2];
+		d = -glm::dot(point1, normal);
+	}
+
 	void normalize()
 	{
 		float length = sqrt(a*a + b*b + c*c);
@@ -126,7 +128,7 @@ public:
  */
 struct TriangleToRasterize
 {
-	Vertex v0, v1, v2;
+	Vertex<float> v0, v1, v2;
 	int min_x;
 	int max_x;
 	int min_y;
@@ -166,7 +168,8 @@ struct TriangleToRasterize
  * @param[in] viewport_height Screen height.
  * @return A bounding box rectangle.
  */
-cv::Rect calculate_clipped_bounding_box(cv::Vec4f v0, cv::Vec4f v1, cv::Vec4f v2, int viewport_width, int viewport_height)
+template<typename T, glm::precision P = glm::defaultp>
+cv::Rect calculate_clipped_bounding_box(const glm::tvec2<T, P>& v0, const glm::tvec2<T, P>& v1, const glm::tvec2<T, P>& v2, int viewport_width, int viewport_height)
 {
 	/* Old, producing artifacts:
 	t.minX = max(min(t.v0.position[0], min(t.v1.position[0], t.v2.position[0])), 0.0f);
@@ -178,10 +181,10 @@ cv::Rect calculate_clipped_bounding_box(cv::Vec4f v0, cv::Vec4f v1, cv::Vec4f v2
 	using std::max;
 	using std::floor;
 	using std::ceil;
-	int minX = max(min(floor(v0[0]), min(floor(v1[0]), floor(v2[0]))), 0.0f); // Readded this comment after merge: What about rounding, or rather the conversion from double to int?
-	int maxX = min(max(ceil(v0[0]), max(ceil(v1[0]), ceil(v2[0]))), static_cast<float>(viewport_width - 1));
-	int minY = max(min(floor(v0[1]), min(floor(v1[1]), floor(v2[1]))), 0.0f);
-	int maxY = min(max(ceil(v0[1]), max(ceil(v1[1]), ceil(v2[1]))), static_cast<float>(viewport_height - 1));
+	int minX = max(min(floor(v0[0]), min(floor(v1[0]), floor(v2[0]))), T(0)); // Readded this comment after merge: What about rounding, or rather the conversion from double to int?
+	int maxX = min(max(ceil(v0[0]), max(ceil(v1[0]), ceil(v2[0]))), static_cast<T>(viewport_width - 1));
+	int minY = max(min(floor(v0[1]), min(floor(v1[1]), floor(v2[1]))), T(0));
+	int maxY = min(max(ceil(v0[1]), max(ceil(v1[1]), ceil(v2[1]))), static_cast<T>(viewport_height - 1));
 	return cv::Rect(minX, minY, maxX - minX, maxY - minY);
 };
 
@@ -195,24 +198,26 @@ cv::Rect calculate_clipped_bounding_box(cv::Vec4f v0, cv::Vec4f v1, cv::Vec4f v2
  * @param[in] v2 Third vertex.
  * @return Whether the vertices are CCW in screen space.
  */
-bool are_vertices_ccw_in_screen_space(const cv::Vec4f& v0, const cv::Vec4f& v1, const cv::Vec4f& v2)
+template<typename T, glm::precision P = glm::defaultp>
+bool are_vertices_ccw_in_screen_space(const glm::tvec2<T, P>& v0, const glm::tvec2<T, P>& v1, const glm::tvec2<T, P>& v2)
 {
-	float dx01 = v1[0] - v0[0];
-	float dy01 = v1[1] - v0[1];
-	float dx02 = v2[0] - v0[0];
-	float dy02 = v2[1] - v0[1];
+	const auto dx01 = v1[0] - v0[0]; // todo: replace with x/y (GLM)
+	const auto dy01 = v1[1] - v0[1];
+	const auto dx02 = v2[0] - v0[0];
+	const auto dy02 = v2[1] - v0[1];
 
-	return (dx01*dy02 - dy01*dx02 < 0.0f); // Original: (dx01*dy02 - dy01*dx02 > 0.0f). But: OpenCV has origin top-left, y goes down
+	return (dx01*dy02 - dy01*dx02 < T(0)); // Original: (dx01*dy02 - dy01*dx02 > 0.0f). But: OpenCV has origin top-left, y goes down
 };
 
-double implicit_line(float x, float y, const cv::Vec4f& v1, const cv::Vec4f& v2)
+template<typename T, glm::precision P = glm::defaultp>
+double implicit_line(float x, float y, const glm::tvec4<T, P>& v1, const glm::tvec4<T, P>& v2)
 {
 	return ((double)v1[1] - (double)v2[1])*(double)x + ((double)v2[0] - (double)v1[0])*(double)y + (double)v1[0] * (double)v2[1] - (double)v2[0] * (double)v1[1];
 };
 
-std::vector<Vertex> clip_polygon_to_plane_in_4d(const std::vector<Vertex>& vertices, const cv::Vec4f& plane_normal)
+inline std::vector<Vertex<float>> clip_polygon_to_plane_in_4d(const std::vector<Vertex<float>>& vertices, const glm::tvec4<float>& plane_normal)
 {
-	std::vector<Vertex> clippedVertices;
+	std::vector<Vertex<float>> clippedVertices;
 
 	// We can have 2 cases:
 	//	* 1 vertex visible: we make 1 new triangle out of the visible vertex plus the 2 intersection points with the near-plane
@@ -225,27 +230,27 @@ std::vector<Vertex> clip_polygon_to_plane_in_4d(const std::vector<Vertex>& verti
 		int a = i; // the current vertex
 		int b = (i + 1) % vertices.size(); // the following vertex (wraps around 0)
 
-		float fa = vertices[a].position.dot(plane_normal); // Note: Shouldn't they be unit length?
-		float fb = vertices[b].position.dot(plane_normal); // < 0 means on visible side, > 0 means on invisible side?
+		float fa = glm::dot(vertices[a].position, plane_normal); // Note: Shouldn't they be unit length?
+		float fb = glm::dot(vertices[b].position, plane_normal); // < 0 means on visible side, > 0 means on invisible side?
 
 		if ((fa < 0 && fb > 0) || (fa > 0 && fb < 0)) // one vertex is on the visible side of the plane, one on the invisible? so we need to split?
 		{
-			cv::Vec4f direction = vertices[b].position - vertices[a].position;
-			float t = -(plane_normal.dot(vertices[a].position)) / (plane_normal.dot(direction)); // the parametric value on the line, where the line to draw intersects the plane?
+			auto direction = vertices[b].position - vertices[a].position;
+			float t = -(glm::dot(plane_normal, vertices[a].position)) / (glm::dot(plane_normal, direction)); // the parametric value on the line, where the line to draw intersects the plane?
 
 			// generate a new vertex at the line-plane intersection point
-			cv::Vec4f position = vertices[a].position + t*direction;
-			cv::Vec3f color = vertices[a].color + t*(vertices[b].color - vertices[a].color);
-			cv::Vec2f texCoord = vertices[a].texcoords + t*(vertices[b].texcoords - vertices[a].texcoords);	// We could omit that if we don't render with texture.
+			auto position = vertices[a].position + t*direction;
+			auto color = vertices[a].color + t*(vertices[b].color - vertices[a].color);
+			auto texCoord = vertices[a].texcoords + t*(vertices[b].texcoords - vertices[a].texcoords);	// We could omit that if we don't render with texture.
 
 			if (fa < 0) // we keep the original vertex plus the new one
 			{
 				clippedVertices.push_back(vertices[a]);
-				clippedVertices.push_back(Vertex(position, color, texCoord));
+				clippedVertices.push_back(Vertex<float>{position, color, texCoord});
 			}
 			else if (fb < 0) // we use only the new vertex
 			{
-				clippedVertices.push_back(Vertex(position, color, texCoord));
+				clippedVertices.push_back(Vertex<float>{position, color, texCoord});
 			}
 		}
 		else if (fa < 0 && fb < 0) // both are visible (on the "good" side of the plane), no splitting required, use the current vertex
@@ -258,14 +263,35 @@ std::vector<Vertex> clip_polygon_to_plane_in_4d(const std::vector<Vertex>& verti
 	return clippedVertices;
 };
 
+/**
+ * @brief Todo.
+ *
+ * Takes in clip coords? and outputs NDC.
+ * divides by w and outputs [x_ndc, y_ndc, z_ndc, 1/w_clip].
+ * The w-component is set to 1/w_clip (which is what OpenGL passes to the FragmentShader).
+ *
+ * @param[in] vertex X.
+ * @ return X.
+ */
+template <typename T, glm::precision P = glm::defaultp>
+glm::tvec4<T, P> divide_by_w(const glm::tvec4<T, P>& vertex)
+{
+    auto one_over_w = 1.0 / vertex.w;
+    // divide by w: (if ortho, w will just be 1)
+    glm::tvec4<T, P> v_ndc(vertex / vertex.w);
+    // Set the w coord to 1/w (i.e. 1/w_clip). This is what OpenGL passes to the FragmentShader.
+    v_ndc.w = one_over_w;
+    return v_ndc;
+};
+
 // used only in tex2D_linear_mipmap_linear
 // template?
-float clamp(float x, float a, float b)
+inline float clamp(float x, float a, float b)
 {
 	return std::max(std::min(x, b), a);
 };
 
-cv::Vec2f texcoord_wrap(const cv::Vec2f& texcoords)
+inline cv::Vec2f texcoord_wrap(const cv::Vec2f& texcoords)
 {
 	return cv::Vec2f(texcoords[0] - (int)texcoords[0], texcoords[1] - (int)texcoords[1]);
 };
@@ -274,12 +300,20 @@ cv::Vec2f texcoord_wrap(const cv::Vec2f& texcoords)
 cv::Vec3f tex2d_linear_mipmap_linear(const cv::Vec2f& texcoords, const Texture& texture, float dudx, float dudy, float dvdx, float dvdy);
 cv::Vec3f tex2d_linear(const cv::Vec2f& imageTexCoord, unsigned char mipmapIndex, const Texture& texture);
 
-cv::Vec3f tex2d(const cv::Vec2f& texcoords, const Texture& texture, float dudx, float dudy, float dvdx, float dvdy)
+inline cv::Vec3f tex2d(const cv::Vec2f& texcoords, const Texture& texture, float dudx, float dudy, float dvdx, float dvdy)
 {
 	return (1.0f / 255.0f) * tex2d_linear_mipmap_linear(texcoords, texture, dudx, dudy, dvdx, dvdy);
 };
 
-cv::Vec3f tex2d_linear_mipmap_linear(const cv::Vec2f& texcoords, const Texture& texture, float dudx, float dudy, float dvdx, float dvdy)
+template<typename T, glm::precision P = glm::defaultp>
+glm::tvec3<T, P> tex2d(const glm::tvec2<T, P>& texcoords, const Texture& texture, float dudx, float dudy, float dvdx, float dvdy)
+{
+	// Todo: Change everything to GLM.
+	cv::Vec3f ret = (1.0f / 255.0f) * tex2d_linear_mipmap_linear(cv::Vec2f(texcoords[0], texcoords[1]), texture, dudx, dudy, dvdx, dvdy);
+	return glm::tvec3<T, P>(ret[0], ret[1], ret[2]);
+};
+
+inline cv::Vec3f tex2d_linear_mipmap_linear(const cv::Vec2f& texcoords, const Texture& texture, float dudx, float dudy, float dvdx, float dvdy)
 {
 	using cv::Vec2f;
 	float px = std::sqrt(std::pow(dudx, 2) + std::pow(dvdx, 2));
@@ -306,7 +340,7 @@ cv::Vec3f tex2d_linear_mipmap_linear(const cv::Vec2f& texcoords, const Texture& 
 	return color;
 };
 
-cv::Vec3f tex2d_linear(const cv::Vec2f& imageTexCoord, unsigned char mipmap_index, const Texture& texture)
+inline cv::Vec3f tex2d_linear(const cv::Vec2f& imageTexCoord, unsigned char mipmap_index, const Texture& texture)
 {
 	int x = (int)imageTexCoord[0];
 	int y = (int)imageTexCoord[1];
@@ -358,7 +392,7 @@ cv::Vec3f tex2d_linear(const cv::Vec2f& imageTexCoord, unsigned char mipmap_inde
 // Todo: Split this function into the general (core-part) and the texturing part.
 // Then, utils::extractTexture can re-use the core-part.
 // Note: Maybe a bit outdated "todo" above.
-boost::optional<TriangleToRasterize> process_prospective_tri(Vertex v0, Vertex v1, Vertex v2, int viewport_width, int viewport_height, bool enable_backface_culling)
+inline boost::optional<TriangleToRasterize> process_prospective_tri(Vertex<float> v0, Vertex<float> v1, Vertex<float> v2, int viewport_width, int viewport_height, bool enable_backface_culling)
 {
 	using cv::Vec2f;
 	using cv::Vec3f;
@@ -396,12 +430,12 @@ boost::optional<TriangleToRasterize> process_prospective_tri(Vertex v0, Vertex v
 	t.v2.position[1] = v2_screen[1];
 
 	if (enable_backface_culling) {
-		if (!are_vertices_ccw_in_screen_space(t.v0.position, t.v1.position, t.v2.position))
+		if (!are_vertices_ccw_in_screen_space(glm::tvec2<float>(t.v0.position), glm::tvec2<float>(t.v1.position), glm::tvec2<float>(t.v2.position)))
 			return boost::none;
 	}
 
 	// Get the bounding box of the triangle:
-	cv::Rect boundingBox = calculate_clipped_bounding_box(t.v0.position, t.v1.position, t.v2.position, viewport_width, viewport_height);
+	cv::Rect boundingBox = calculate_clipped_bounding_box(glm::tvec2<float>(t.v0.position), glm::tvec2<float>(t.v1.position), glm::tvec2<float>(t.v2.position), viewport_width, viewport_height);
 	t.min_x = boundingBox.x;
 	t.max_x = boundingBox.x + boundingBox.width;
 	t.min_y = boundingBox.y;
@@ -435,7 +469,7 @@ boost::optional<TriangleToRasterize> process_prospective_tri(Vertex v0, Vertex v
 	return boost::optional<TriangleToRasterize>(t);
 };
 
-void raster_triangle(TriangleToRasterize triangle, cv::Mat colourbuffer, cv::Mat depthbuffer, boost::optional<Texture> texture, bool enable_far_clipping)
+inline void raster_triangle(TriangleToRasterize triangle, cv::Mat colourbuffer, cv::Mat depthbuffer, boost::optional<Texture> texture, bool enable_far_clipping)
 {
 	using cv::Vec2f;
 	using cv::Vec3f;
@@ -484,10 +518,10 @@ void raster_triangle(TriangleToRasterize triangle, cv::Mat colourbuffer, cv::Mat
 					gamma *= d*triangle.one_over_z2;
 
 					// attributes interpolation
-					Vec3f color_persp = alpha*triangle.v0.color + beta*triangle.v1.color + gamma*triangle.v2.color; // Note: color might be empty if we use texturing and the shape-only model - but it works nonetheless? I think I set the vertex-colour to 127 in the shape-only model.
-					Vec2f texcoords_persp = alpha*triangle.v0.texcoords + beta*triangle.v1.texcoords + gamma*triangle.v2.texcoords;
+					glm::tvec3<float> color_persp = static_cast<float>(alpha)*triangle.v0.color + static_cast<float>(beta)*triangle.v1.color + static_cast<float>(gamma)*triangle.v2.color; // Note: color might be empty if we use texturing and the shape-only model - but it works nonetheless? I think I set the vertex-colour to 127 in the shape-only model.
+					glm::tvec2<float> texcoords_persp = static_cast<float>(alpha)*triangle.v0.texcoords + static_cast<float>(beta)*triangle.v1.texcoords + static_cast<float>(gamma)*triangle.v2.texcoords;
 
-					Vec3f pixel_color;
+					glm::tvec3<float> pixel_color;
 					// Pixel Shader:
 					if (texture) { // We use texturing
 						// check if texture != NULL?
@@ -509,8 +543,8 @@ void raster_triangle(TriangleToRasterize triangle, cv::Mat colourbuffer, cv::Mat
 						dvdy *= texture.get().mipmaps[0].rows;
 
 						// The Texture is in BGR, thus tex2D returns BGR
-						Vec3f texture_color = detail::tex2d(texcoords_persp, texture.get(), dudx, dudy, dvdx, dvdy); // uses the current texture
-						pixel_color = Vec3f(texture_color[2], texture_color[1], texture_color[0]);
+						glm::tvec3<float> texture_color = detail::tex2d(texcoords_persp, texture.get(), dudx, dudy, dvdx, dvdy); // uses the current texture
+						pixel_color = glm::tvec3<float>(texture_color[2], texture_color[1], texture_color[0]);
 						// other: color.mul(tex2D(texture, texCoord));
 						// Old note: for texturing, we load the texture as BGRA, so the colors get the wrong way in the next few lines...
 					}

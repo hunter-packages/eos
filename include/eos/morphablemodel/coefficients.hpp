@@ -1,5 +1,5 @@
 /*
- * Eos - A 3D Morphable Model fitting library written in modern C++11/14.
+ * eos - A 3D Morphable Model fitting library written in modern C++11/14.
  *
  * File: include/eos/morphablemodel/coefficients.hpp
  *
@@ -38,7 +38,7 @@ namespace eos {
  * @param[in] filename The file to write.
  * @throws std::runtime_error if unable to open the given file for writing.
  */
-void save_coefficients(std::vector<float> coefficients, std::string filename)
+inline void save_coefficients(std::vector<float> coefficients, std::string filename)
 {
 	std::ofstream file(filename);
 	if (file.fail()) {

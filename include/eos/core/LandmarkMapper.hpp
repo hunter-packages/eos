@@ -1,5 +1,5 @@
 /*
- * Eos - A 3D Morphable Model fitting library written in modern C++11/14.
+ * eos - A 3D Morphable Model fitting library written in modern C++11/14.
  *
  * File: include/eos/core/LandmarkMapper.hpp
  *
@@ -65,8 +65,7 @@ public:
 	 * that performs an identity mapping is constructed.
 	 *
 	 * @param[in] filename A file with landmark mappings.
-	 * @throws runtime_error if there is an error loading
-	 *         the mappings from the file.
+	 * @throws runtime_error if there is an error loading the mappings from the file.
 	 */
 	LandmarkMapper(boost::filesystem::path filename)
 	{
@@ -125,7 +124,7 @@ public:
 	 *
 	 * @return The number of landmark mappings.
 	 */
-	size_t size() const
+	auto num_mappings() const
 	{
 		return landmark_mappings.size();
 	};

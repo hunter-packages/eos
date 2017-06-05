@@ -3,14 +3,14 @@ eos: A lightweight header-only 3D Morphable Model fitting library in modern C++1
 
 Files in this directory:
 
-- ibug2did.txt:
+- ibug_to_sfm.txt:
 	Mappings from the popular ibug 68-point 2D facial landmarks markup to
 	Surrey Face Model indices.
 
 - sfm_shape_3448.bin:
 	The public shape-only Surrey 3D Morphable Face Model.
 	To obtain a full 3DMM and higher resolution levels, follow the instructions
-	at <todo: add link to the page of the Uni>.
+	at cvssp.org/facemodel.
 	Details about the different models can be found in:
 	"A Multiresolution 3D Morphable Face Model and Fitting Framework",
 	P. Huber, G. Hu, R. Tena, P. Mortazavian, W. Koppen, W. Christmas, M. Rätsch, J. Kittler,
@@ -19,6 +19,12 @@ Files in this directory:
 - expression_blendshapes_3448.bin:
 	6 expression blendshapes for the sfm_shape_3448 model. Contains the expressions angry,
 	disgust, fear, happy, sad and surprised.
+
+- sfm_3448_edge_topology.json:
+	Contains a precomputed list of the model's edges, and the two faces and vertices that are
+	adjacent to each edge. Uses 1-based indexing ("0" has a special meaning of "no adjacent
+	vertex/edge") - this may change to 0-based in the future to be consistent with the rest of
+	the library. The file is used in the edge-fitting.
 
 - model_contours.json:
 	Definition of the model's contour vertices of the right and left side of the face.
@@ -29,10 +35,10 @@ Files in this directory:
 	model, if the points exist here.
 	
 - reference_annotated.obj:
-	Visualisation of the landmark points defined in the ibug2did.txt mapping file.
+	Visualisation of the landmark points defined in the ibug_to_sfm.txt mapping file.
 	* Red: Annotated ibug points that are defined on the reference shape.
 	* Green: Contour vertices from the file model_contours.json.
-	The file ibug2did.txt contains a few more mappings of landmarks that are not present
+	The file ibug_to_sfm.txt contains a few more mappings of landmarks that are not present
 	in the reference, for example the middle-inner eyebrow points - they are not visualised.
 
 - reference_symmetry.txt:
