@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.1.3)
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.19.0.tar.gz"
-    SHA1 "e9d11aee66607cfcfbec5e3811d4804135b5bfac"
-)  
+    URL "https://github.com/ruslo/hunter/archive/v0.19.3.tar.gz"
+    SHA1 "e51fe0738085793492e77e0cf89556473e587ec4"
+)
 
 project(eos VERSION 0.12.1)
 
