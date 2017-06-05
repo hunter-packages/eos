@@ -136,6 +136,8 @@ target_include_directories(eos
   "$<BUILD_INTERFACE:${eos_inc_dir}>" # i.e., submodule use
   )
 
+set(eos_3RDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty") # this is used by the CMakeLists.txt files in the subdirectories
+
 # Custom target for the library, to make the headers show up in IDEs:
 add_custom_target(eos-headers SOURCES ${eos_headers})
 source_group(core REGULAR_EXPRESSION include/eos/core/*)
