@@ -33,7 +33,7 @@ matlab_add_mex(
   NAME eos-matlab-render
   SRC +eos/+render/private/render.cpp
   OUTPUT_NAME render
-  LINK_TO eos ${OpenCV_LIBS} ${Boost_LIBRARIES}
+  LINK_TO eos ${OpenCV_LIBS} ${boost_libs}
 )
 
 # Group the matlab bindings targets into one folder (in IDEs):
