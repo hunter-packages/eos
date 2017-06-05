@@ -54,7 +54,7 @@ hunter_add_package(OpenCV)
 find_package(OpenCV REQUIRED core)
 
 hunter_add_package(Boost COMPONENTS system)
-find_package(Boost 1.50.0 COMPONENTS system REQUIRED)
+find_package(Boost CONFIG REQUIRED system)
 message(STATUS "Boost found at ${Boost_INCLUDE_DIRS}")
 
 hunter_add_package(Eigen)
