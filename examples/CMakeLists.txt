@@ -1,10 +1,10 @@
 # The examples need a few additional dependencies (e.g. boost filesystem and OpenCV highgui):
-find_package(OpenCV REQUIRED core highgui)
+
+hunter_add_package(OpenCV)
+find_package(OpenCV REQUIRED core imgproc imgcodecs)
 
 hunter_add_package(Boost COMPONENTS system filesystem program_options)
 find_package(Boost CONFIG REQUIRED system filesystem program_options)
-message(STATUS "Boost found at ${Boost_INCLUDE_DIRS}")
-
 set(boost_libs Boost::system Boost::filesystem Boost::program_options)
 
 # https://stackoverflow.com/a/39547577
