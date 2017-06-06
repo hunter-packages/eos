@@ -3,7 +3,7 @@
 include(CMakeFindDependencyMacro)
 
 find_dependency(OpenCV)
-find_dependency(Boost CONFIG system)
+find_package(Boost CONFIG REQUIRED system)
 find_dependency(Eigen3 CONFIG)
 find_dependency(cereal CONFIG)
 find_dependency(glm)
