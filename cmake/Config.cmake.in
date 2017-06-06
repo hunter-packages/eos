@@ -2,13 +2,13 @@
 
 include(CMakeFindDependencyMacro)
 
-find_dependency(OpenCV REQUIRED)
-find_dependency(Boost CONFIG REQUIRED)
-find_dependency(Eigen3 CONFIG REQUIRED)
-find_dependency(cereal CONFIG REQUIRED)
-find_dependency(glm REQUIRED)
-find_dependency(nanoflann CONFIG REQUIRED)
-find_dependency(eigen3-nnls CONFIG REQUIRED)
+find_dependency(OpenCV)
+find_dependency(Boost CONFIG system)
+find_dependency(Eigen3 CONFIG)
+find_dependency(cereal CONFIG)
+find_dependency(glm)
+find_dependency(nanoflann CONFIG)
+find_dependency(eigen3-nnls CONFIG)
 
 include("${CMAKE_CURRENT_LIST_DIR}/@targets_export_name@.cmake")
 check_required_components("@PROJECT_NAME@")
