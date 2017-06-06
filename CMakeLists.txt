@@ -125,8 +125,18 @@ target_link_libraries(
     nanoflann::nanoflann
     )
 
-target_sources(eos INTERFACE ${eos_headers})  
-
+# Note: original CMakeLists.txt includes this for soure listing, but
+# this leads to:
+#
+#  Target "eos" INTERFACE_SOURCES property contains path:
+#    /some/absolute/path/eos/include/eos/render/detail/Vertex.hpp
+# 
+#  which is prefixed in the source directory.
+#
+# Since this is not critical for builds we can ommit it.
+#
+# target_sources(eos INTERFACE ${eos_headers})  
+  
 target_compile_features(eos INTERFACE ${EOS_CXX_COMPILE_FEATURES})
 
 # Add header includes:
@@ -179,3 +189,40 @@ if(EOS_GENERATE_MATLAB_BINDINGS)
   install(DIRECTORY ${eos_3RDPARTY_DIR}/mexplus/include/ DESTINATION 3rdparty/mexplus/include) # mexplus headers
   install(FILES ${eos_3RDPARTY_DIR}/mexplus/LICENSE DESTINATION 3rdparty/mexplus/) # mexplus licence
 endif()
+
+# Installation:
+
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+set(config_install_dir "lib/cmake/${PROJECT_NAME}")
+set(include_install_dir "include")
+
+set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+set(targets_export_name "${PROJECT_NAME}Targets")
+set(namespace "${PROJECT_NAME}::")
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${version_config}" COMPATIBILITY SameMajorVersion
+  )
+
+# Note: use 'targets_export_name'
+configure_file("cmake/Config.cmake.in" "${project_config}" @ONLY)
+
+install(
+  TARGETS eos
+  EXPORT "${targets_export_name}"
+  INCLUDES DESTINATION "${include_install_dir}"
+  )
+
+install(
+  FILES "${project_config}" "${version_config}"
+  DESTINATION "${config_install_dir}"
+  )
+
+install(
+  EXPORT "${targets_export_name}"
+  NAMESPACE "${namespace}"
+  DESTINATION "${config_install_dir}"
+  )
